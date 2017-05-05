@@ -1,8 +1,3 @@
-// client-side js
-// run by the browser each time your view template is loaded
-
-// by default, you've got jQuery,
-// add other scripts at the bottom of index.html
 
 function createUUID() {
     var s = [];
@@ -29,7 +24,8 @@ $(function() {
         console.log(this.responseText);
       }      
     };
-
+    
+    xhr.setRequestHeader("x-file-name", data.name);
     xhr.send(data);
   }
   
