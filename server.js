@@ -3,6 +3,8 @@
 
 // init project
 var express = require('express');
+var path = require('path')
+
 var app = express();
 
 // http://expressjs.com/en/starter/static-files.html
@@ -46,6 +48,56 @@ tempCache.deleteEntry = function(id) {
   delete this[id];
 }
 
+
+function testRequest(req) {
+    console.log('Headers: ' + JSON.stringify(req.headers));
+}
+
+function calculateContentType(fileName, defaultValue) {
+  const MAPPING = {
+    ".doc":      "application/msword",
+    ".dot":      "application/msword",
+
+    ".docx":     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ".dotx":     "application/vnd.openxmlformats-officedocument.wordprocessingml.template",
+    ".docm":     "application/vnd.ms-word.document.macroEnabled.12",
+    ".dotm":     "application/vnd.ms-word.template.macroEnabled.12",
+
+    ".xls":      "application/vnd.ms-excel",
+    ".xlt":      "application/vnd.ms-excel",
+    ".xla":      "application/vnd.ms-excel",
+
+    ".xlsx":     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ".xltx":     "application/vnd.openxmlformats-officedocument.spreadsheetml.template",
+    ".xlsm":     "application/vnd.ms-excel.sheet.macroEnabled.12",
+    ".xltm":     "application/vnd.ms-excel.template.macroEnabled.12",
+    ".xlam":     "application/vnd.ms-excel.addin.macroEnabled.12",
+    ".xlsb":     "application/vnd.ms-excel.sheet.binary.macroEnabled.12",
+
+    ".ppt":      "application/vnd.ms-powerpoint",
+    ".pot":      "application/vnd.ms-powerpoint",
+    ".pps":      "application/vnd.ms-powerpoint",
+    ".ppa":      "application/vnd.ms-powerpoint",
+
+    ".pptx":     "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    ".potx":     "application/vnd.openxmlformats-officedocument.presentationml.template",
+    ".ppsx":     "application/vnd.openxmlformats-officedocument.presentationml.slideshow",
+    ".ppam":     "application/vnd.ms-powerpoint.addin.macroEnabled.12",
+    ".pptm":     "application/vnd.ms-powerpoint.presentation.macroEnabled.12",
+    ".potm":     "application/vnd.ms-powerpoint.template.macroEnabled.12",
+    ".ppsm":     "application/vnd.ms-powerpoint.slideshow.macroEnabled.12"
+  }
+  
+  let extension = path.extname(fileName);
+  
+  var result = MAPPING[extension];
+  if (result === undefined) {
+    result = defaultValue;
+  }
+      
+  return result;
+}
+
 app.post("/temp", function (request, response) {
   response.setHeader('Access-Control-Allow-Origin', '*');  
 
@@ -53,7 +105,7 @@ app.post("/temp", function (request, response) {
   
   const cacheEntry = tempCache.getOrCreateEntry(id);
   
-  cacheEntry.contentType = request.header("Content-Type");
+  cacheEntry.contentType = calculateContentType(request.header("x-file-name"), request.header("Content-Type"));
   cacheEntry.contentDisposition = request.header("Content-Disposition");
   
   cacheEntry.headerLoaded = true;
@@ -65,11 +117,11 @@ app.post("/temp", function (request, response) {
   console.log('Content type: ' + cacheEntry.contentType);
   console.log('Content disposition: ' + cacheEntry.contentDisposition);
   
-
+  testRequest(request);
+  
   cacheEntry.loaded = false;
   cacheEntry.contentLength = 0;
   cacheEntry.content = [];
-
   
   request.on('data', function(chunk) {
     cacheEntry.content.push(chunk);
@@ -79,6 +131,8 @@ app.post("/temp", function (request, response) {
       cacheEntry.ondata();
     }
   }).on('end', function() {
+    console.log('x_filename' + request.headers['x_filename']);
+    
     cacheEntry.loaded = true;
 
     if (cacheEntry.onload !== undefined) {
