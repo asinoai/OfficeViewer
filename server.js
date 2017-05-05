@@ -48,11 +48,6 @@ tempCache.deleteEntry = function(id) {
   delete this[id];
 }
 
-
-function testRequest(req) {
-    console.log('Headers: ' + JSON.stringify(req.headers));
-}
-
 function calculateContentType(fileName, defaultValue) {
   const MAPPING = {
     ".doc":      "application/msword",
@@ -116,9 +111,7 @@ app.post("/temp", function (request, response) {
   console.log('Receiving temp data...');
   console.log('Content type: ' + cacheEntry.contentType);
   console.log('Content disposition: ' + cacheEntry.contentDisposition);
-  
-  testRequest(request);
-  
+    
   cacheEntry.loaded = false;
   cacheEntry.contentLength = 0;
   cacheEntry.content = [];
@@ -130,9 +123,7 @@ app.post("/temp", function (request, response) {
     if (cacheEntry.ondata !== undefined) {
       cacheEntry.ondata();
     }
-  }).on('end', function() {
-    console.log('x_filename' + request.headers['x_filename']);
-    
+  }).on('end', function() {    
     cacheEntry.loaded = true;
 
     if (cacheEntry.onload !== undefined) {
