@@ -83,7 +83,7 @@ function calculateContentType(fileName, defaultValue) {
     ".ppsm":     "application/vnd.ms-powerpoint.slideshow.macroEnabled.12"
   }
   
-  let extension = path.extname(fileName);
+  const extension = path.extname(fileName);
   
   var result = MAPPING[extension];
   if (result === undefined) {
@@ -93,6 +93,12 @@ function calculateContentType(fileName, defaultValue) {
   return result;
 }
 
+
+function calculateContentDisposition(fileName, defaultValue) {
+   
+   return defaultValue !== undefined ? defaultValue : 'attachment; filename="' + fileName + '"';
+}
+
 app.post("/temp", function (request, response) {
   response.setHeader('Access-Control-Allow-Origin', '*');  
 
@@ -100,8 +106,9 @@ app.post("/temp", function (request, response) {
   
   const cacheEntry = tempCache.getOrCreateEntry(id);
   
-  cacheEntry.contentType = calculateContentType(request.header("x-file-name"), request.header("Content-Type"));
-  cacheEntry.contentDisposition = request.header("Content-Disposition");
+  const originalFileName = request.header("x-file-name");
+  cacheEntry.contentType = calculateContentType(originalFileName, request.header("Content-Type"));
+  cacheEntry.contentDisposition = calculateContentDisposition(originalFileName, request.header("Content-Disposition"));
   
   cacheEntry.headerLoaded = true;
   if (cacheEntry.onheaders !== undefined) {
