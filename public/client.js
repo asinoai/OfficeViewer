@@ -13,9 +13,7 @@ function createUUID() {
     return uuid;
 }
 
-$(function() {
-  console.log('hello world :o');
-    
+$(function() {    
   function uploadToTemp(data, tempId) {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/temp?id=' + tempId, true);
@@ -25,8 +23,12 @@ $(function() {
       }      
     };
     
-    xhr.setRequestHeader("x-file-name", data.name);
+    xhr.setRequestHeader("x-file-name", encodeURIComponent(data.name));
     xhr.send(data);
+  }
+  
+  function buildViewURL(tempId) {
+    return 'https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fhoneysuckle-eye.gomix.me%2Ftemp%3Fid%3D' + tempId;
   }
   
   $('a[view-type=online]').click(function(event) {
@@ -38,7 +40,7 @@ $(function() {
       $anchor.attr('href-original', $anchor.attr('href'));
     }
 
-    $anchor.attr('href', 'https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fhoneysuckle-eye.gomix.me%2Ftemp%3Fid%3D' + tempId);
+    $anchor.attr('href', buildViewURL(tempId));
 
     var hrefOriginal = $anchor.attr('href-original');
     
@@ -82,8 +84,8 @@ $(function() {
         const tempId = createUUID();
         const this$ = $(this); 
 
-        this$.attr('href', 'https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fhoneysuckle-eye.gomix.me%2Ftemp%3Fid%3D' + tempId);
-        //this$.attr('href', '/temp?id=' + tempId);
+        this$.attr('target', tempId);
+        this$.attr('href', buildViewURL(tempId));
 
         uploadToTemp(this$.prop('blob-data'), tempId);
       }

@@ -1,5 +1,4 @@
 // server.js
-// where your node app starts
 
 // init project
 var express = require('express');
@@ -175,8 +174,6 @@ function writeTempResponseAvailableChunks(response, cacheEntry) {
 function endTempResponse(response, id) {
   response.end();
   tempCache.deleteEntry(id);
-  
-  
 }
 
 function sendTempResponse(response, cacheEntry, id) {
