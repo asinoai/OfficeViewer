@@ -174,6 +174,7 @@ function writeTempResponseAvailableChunks(response, cacheEntry) {
 function endTempResponse(response, id) {
   response.end();
   tempCache.deleteEntry(id);
+  console.log('Sending back finished!');
 }
 
 function sendTempResponse(response, cacheEntry, id) {
